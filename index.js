@@ -93,7 +93,7 @@ app.post('/api/mal', (request, response) => {
       }
     });
 
-    response.render('pages/list', { songData: result });
+    response.render('pages/list', { username: username, songData: result });
   });
 });
 
