@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>karafriends assemble</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
 </head>
 <body>
   <h1>karafriends doko</h1>
 
-  <form name="karafriends" action="/api/mal" method="post">
-    <label for="username">MyAnimeList Username:</label>
-    <input type="text" id="username" name="username"><br>
-    <input type="submit" value="Submit">
+  <form style="text-align: center; display: inline-block" name="karafriends" action="/playlist" method="post">
+    <h4><label for="username">MyAnimeList Username</label></h4>
+    <input style="margin: auto" type="text" id="username" name="username">
+
+    <h4><label for="num_songs">Max Number of Songs</label></h4>
+    <input style="margin: auto" type="number" id="songs" name="num_songs" value="20">
+
+    <h4>Status</h4> 
+    <input type="checkbox" id="status1" name="list_status" value="watching" checked><label for="status1">Watching</label>
+    <input type="checkbox" id="status2" name="list_status" value="completed" checked><label for="status2">Completed</label> 
+    <input type="checkbox"id="status3" name="list_status" value="on_hold"><label for="status3">On Hold</label> 
+    <input type="checkbox" id="status4" name="list_status" value="dropped"><label for="status4">Dropped</label>
+    <input type="checkbox" id="status5" name="list_status" value="plan_to_watch"><label for="status5">Plan To Watch</label>
+    
+    <h4>Media Type</h4> 
+    <input type="checkbox" id="media1" name="media_types" value="tv" checked><label for="media1">TV</label>
+    <input type="checkbox" id="media2" name="media_types" value="movie" checked><label for="media2">Movie</label> 
+    <input type="checkbox"id="media3" name="media_types" value="ova"><label for="media3">OVA</label> 
+    <input type="checkbox" id="media4" name="media_types" value="ona"><label for="media4">ONA</label>
+    <input type="checkbox" id="media5" name="media_types" value="special"><label for="media5">Special</label>
+    
+    <br><br>
+    <input style="margin: auto" type="submit" value="Submit">
   </form>
+
 </body>
 </html>

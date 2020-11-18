@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>karafriends assemble</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
 </head>
 <body>
   <h1>karafriends doko</h1>
@@ -8,12 +10,31 @@
   <h2><%= username + "'s Playlist" %></h2>
 
   <table>
-  <% for (let i = 0; i < songData.length; i++) {  %>
-    <tr>
-        <td><%= songData[i].animeTitle %></td>
-        <td><%= songData[i].songTitle %></td>
-    </tr>
-  <% } %>
+    <colgroup>
+      <col span="1" style="width: 20%;">
+      <col span="1" style="width: 40%;">
+      <col span="1" style="width: 40%;">
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th>Theme Type</td>
+        <th>Anime</td>
+        <th>Song Title</td>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% for (let i = 0; i < songData.length; i++) {  %>
+        <tr>
+          <td><%= songData[i].themeType %></td>
+          <td><%= songData[i].animeTitle %></td>
+          <td><%= songData[i].songTitle %></td>
+        </tr>
+        <% } %>
+    </tbody>
   </table>
+
+  <a href="/">Back</a>
 </body>
 </html>

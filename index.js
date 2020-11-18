@@ -22,7 +22,7 @@ const MAL_ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6Ijk2NDkyZm
 
 const queryMyAnimeList = async (username) => {
   let result = [];
-  let uri = 'https://api.myanimelist.net/v2/users/' + username + '/animelist?fields=list_status&limit=1000';
+  let uri = 'https://api.myanimelist.net/v2/users/' + username + '/animelist?fields=media_type,list_status&limit=1000';
   
   while (true) {
     const response = await axios.get(uri, {
@@ -57,7 +57,9 @@ app
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs');
 
-app.post('/api/mal', (request, response) => {
+app.post('/playlist', (request, response, next) => {
+  console.log(request.body);
+
   const username = request.body.username;
 
   const malPromise = queryMyAnimeList(username);
@@ -72,9 +74,11 @@ app.post('/api/mal', (request, response) => {
     for (let i = 0; i < malData.length; i++) {
       const animeNode = malData[i];
 
-      // TODO: Make this better
-      // Filter only on completed or watching
-      if (!['completed', 'watching'].includes(animeNode.list_status.status)) {
+      if (!request.body.media_types.includes(animeNode.node.media_type)) {
+        continue;
+      }
+
+      if (!request.body.list_status.includes(animeNode.list_status.status)) {
         continue;
       }
 
@@ -82,19 +86,24 @@ app.post('/api/mal', (request, response) => {
     }
 
     const filteredAnime = themesData.filter(node => filteredIds.has(node.malID));
+    const numSongs = Math.min(Number(request.body.num_songs), filteredAnime.length);
+
     shuffleArray(filteredAnime);
 
-    const processedAnime = filteredAnime.slice(0, 20);
+    const processedAnime = filteredAnime.slice(0, numSongs);
 
-    const result = processedAnime.map(anime => { 
+    const result = processedAnime.map(anime => {
+      const theme =  anime.themes[Math.floor(Math.random() * anime.themes.length)];
+
       return {
         'animeTitle': anime.name,
-        'songTitle': anime.themes[Math.floor(Math.random() * anime.themes.length)].themeName,
+        'songTitle': theme.themeName,
+        'themeType': theme.themeType,
       }
     });
 
     response.render('pages/list', { username: username, songData: result });
-  });
+  }).catch(next);
 });
 
 app.get('/', (_, response) => {
