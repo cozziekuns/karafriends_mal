@@ -58,8 +58,6 @@ app
   .set('view engine', 'ejs');
 
 app.post('/playlist', (request, response, next) => {
-  console.log(request.body);
-
   const username = request.body.username;
 
   const malPromise = queryMyAnimeList(username);
@@ -99,6 +97,7 @@ app.post('/playlist', (request, response, next) => {
         'animeTitle': anime.name,
         'songTitle': theme.themeName,
         'themeType': theme.themeType,
+        'songLink': theme.mirror.mirrorURL,
       }
     });
 
