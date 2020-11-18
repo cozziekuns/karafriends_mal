@@ -97,7 +97,7 @@ app.post('/playlist', (request, response, next) => {
         'animeTitle': anime.name,
         'songTitle': theme.themeName,
         'themeType': theme.themeType,
-        'songLink': theme.mirror.mirrorURL,
+        'songLink': 'http' + theme.mirror.mirrorURL.slice(5),
       }
     });
 
