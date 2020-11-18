@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <h1>karafriends doko</h1>
+
+  <table>
+  <% for (let i = 0; i < songData.length; i++) {  %>
+    <tr>
+        <td><%= songData[i].animeTitle %></td>
+        <td><%= songData[i].songTitle %></td>
+    </tr>
+  <% } %>
+  </table>
+</body>
+</html>
