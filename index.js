@@ -93,8 +93,8 @@ app.post('/playlist', (request, response, next) => {
   const stripped = request.body.username.replace(/\s+/g, '');
   const usernames = stripped.split(',');
 
-  if (usernames.length > 5) {
-    throw new Error('No more than 5 lists please...');
+  if (usernames.length > 6) {
+    throw new Error('No more than 6 lists please...');
   }
 
   queryUserThemesBulk(usernames).then((idToThemeMap) => {
