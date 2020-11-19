@@ -39,6 +39,38 @@ const queryMyAnimeList = async (username) => {
   }
 }
 
+const queryUserThemesBulk = async (usernames) => {
+  const promises = [];
+
+  for (let i = 0; i < usernames.length; i++) {
+    promises.push(queryUserThemes(usernames[i]));
+  }
+
+  const result = await Promise.all(promises).then((values) => {
+    const idToThemeMap = new Map();
+
+    for (let i = 0; i < values.length; i++) {
+      for (j = 0; j < values[i].length; j++) {
+        const anime = values[i][j];
+        const theme =  anime.themes[Math.floor(Math.random() * anime.themes.length)];
+
+        const blob = {
+          'animeTitle': anime.name,
+          'songTitle': theme.themeName,
+          'themeType': theme.themeType,
+          'songLink': 'http' + theme.mirror.mirrorURL.slice(5),
+        };
+
+        idToThemeMap.set(anime.malID, blob);
+      }
+    }
+
+    return idToThemeMap;
+  });
+
+  return result;
+}
+
 const queryUserThemes = async (username) => {
   const response = await axios.get('https://themes.moe/api/mal/' + username);
 
@@ -58,51 +90,54 @@ app
   .set('view engine', 'ejs');
 
 app.post('/playlist', (request, response, next) => {
-  const username = request.body.username;
+  const stripped = request.body.username.replace(/\s+/g, '');
+  const usernames = stripped.split(',');
 
-  const malPromise = queryMyAnimeList(username);
-  const themesPromise = queryUserThemes(username);
+  if (usernames.length > 5) {
+    throw new Error('No more than 5 lists please...');
+  }
 
-  Promise.all([malPromise, themesPromise]).then((values) => {
-    const malData = values[0];
-    const themesData = values[1];
+  queryUserThemesBulk(usernames).then((idToThemeMap) => {
+    const malPromises = [];
 
-    const filteredIds = new Set();
-
-    for (let i = 0; i < malData.length; i++) {
-      const animeNode = malData[i];
-
-      if (!request.body.media_types.includes(animeNode.node.media_type)) {
-        continue;
-      }
-
-      if (!request.body.list_status.includes(animeNode.list_status.status)) {
-        continue;
-      }
-
-      filteredIds.add(animeNode.node.id);
+    for (let i = 0; i < usernames.length; i++) {
+      malPromises.push(queryMyAnimeList(usernames[i]));
     }
 
-    const filteredAnime = themesData.filter(node => filteredIds.has(node.malID));
-    const numSongs = Math.min(Number(request.body.num_songs), filteredAnime.length);
+    Promise.all(malPromises).then((values) => {
+      const filteredSet = new Set();
 
-    shuffleArray(filteredAnime);
-
-    const processedAnime = filteredAnime.slice(0, numSongs);
-
-    const result = processedAnime.map(anime => {
-      const theme =  anime.themes[Math.floor(Math.random() * anime.themes.length)];
-
-      return {
-        'animeTitle': anime.name,
-        'songTitle': theme.themeName,
-        'themeType': theme.themeType,
-        'songLink': 'http' + theme.mirror.mirrorURL.slice(5),
+      for (let i = 0; i < values.length; i++) {
+        for (let j = 0; j < values[i].length; j++) {
+          const animeNode = values[i][j];
+    
+          if (!idToThemeMap.has(animeNode.node.id)) {
+            continue;
+          }
+    
+          if (!request.body.media_types.includes(animeNode.node.media_type)) {
+            continue;
+          }
+    
+          if (!request.body.list_status.includes(animeNode.list_status.status)) {
+            continue;
+          }
+    
+          filteredSet.add(animeNode.node.id);
+        }
       }
-    });
+      
+      const filteredIds = Array.from(filteredSet);
+      const numSongs = Math.min(Number(request.body.num_songs), filteredIds.length);
 
-    response.render('pages/list', { username: username, songData: result });
+      shuffleArray(filteredIds);
+
+      const result = filteredIds.slice(0, numSongs).map(id => idToThemeMap.get(id));
+
+      response.render('pages/list', { username: usernames.join(' + '), songData: result });
+    }).catch(next);
   }).catch(next);
+  
 });
 
 app.get('/', (_, response) => {
